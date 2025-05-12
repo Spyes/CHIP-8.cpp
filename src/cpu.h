@@ -62,6 +62,7 @@ class CPU
     void Initialize();
     void Compile(const char* filename);
     void ReadROM(const char* filename);
+    void LoadProgram(std::vector<uint8_t> program);
     void Fetch();
     void Decode();
     void SetDelayTimer(uint8_t value);

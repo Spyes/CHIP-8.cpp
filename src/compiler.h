@@ -1,7 +1,6 @@
 #pragma once
 
 #include <fstream>
-#include <sstream>
 #include <iostream>
 #include <string>
 
@@ -147,12 +146,12 @@ public:
         }
       }
     }
+    infile.close();
   }
 
-  void Generator() {
+  std::vector<uint8_t> Generator() {
     uint8_t reg;
-    uint8_t x;
-    std::stringstream ss;
+    uint8_t value;
     std::cout << "Generating byte code" << std::endl;
     std::cout << std::endl << "Number of instructions: " << instructions.size() << std::endl;
     for (auto instruction : instructions) {
@@ -161,12 +160,29 @@ public:
       if (mnemonic == "CLS") {
         byteCode.push_back(0x00);
         byteCode.push_back(0x0E);
-      
+      } else if (mnemonic == "LD") {
+        reg = std::stoi(params.at(0).substr(1, 1), 0, 16);
+        value = std::stoi(params.at(1), 0, 16);
+        byteCode.push_back(0x60 + reg);
+        byteCode.push_back(0x00 + value);
+      } else if (mnemonic == "LF") {
+        reg = std::stoi(params.at(0).substr(1, 1), 0, 16);
+        byteCode.push_back(0xF0 + reg);
+        byteCode.push_back(0x29);
+      } else if (mnemonic == "DRW") {
+        reg = std::stoi(params.at(0).substr(1, 1), 0, 16);
+        byteCode.push_back(0xD0 + reg);
+        reg = std::stoi(params.at(1).substr(1, 1));
+        value = std::stoi(params.at(2), 0, 16);
+        byteCode.push_back((reg * 0x10) + value);
+      } else if (mnemonic == "JP") {
+        value = std::stoi(params.at(0).substr(0, 1), 0, 16);
+        byteCode.push_back(0x10 + value);
+        value = std::stoi(params.at(0).substr(1, 2), 0, 16);
+        byteCode.push_back(value);
       }
     }
 
-    for (auto byte : byteCode) {
-      printf("%x\n", byte);
-    }
+    return byteCode;
   }
 };

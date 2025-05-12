@@ -71,26 +71,26 @@ void CPU::Initialize()
     memory[i + FONT_START_ADDR] = fontset.at(i);
   }
 
-  memory[PROG_START_ADDR+ 0] = 0x00;
-  memory[PROG_START_ADDR+ 1] = 0x0E; // 0x0200 CLS
+  // memory[PROG_START_ADDR+ 0] = 0x00;
+  // memory[PROG_START_ADDR+ 1] = 0x0E; // 0x0200 CLS
   
-  memory[PROG_START_ADDR+ 2] = 0x60;
-  memory[PROG_START_ADDR+ 3] = 0x01; // 0x0202 LD r0, 0x01
+  // memory[PROG_START_ADDR+ 2] = 0x60;
+  // memory[PROG_START_ADDR+ 3] = 0x01; // 0x0202 LD r0, 0x01
   
-  memory[PROG_START_ADDR+ 4] = 0xF0;
-  memory[PROG_START_ADDR+ 5] = 0x29; // 0x0204 LD F, r0
+  // memory[PROG_START_ADDR+ 4] = 0xF0;
+  // memory[PROG_START_ADDR+ 5] = 0x29; // 0x0204 LD F, r0
   
-  memory[PROG_START_ADDR+ 6] = 0x60;
-  memory[PROG_START_ADDR+ 7] = 0x0A; // 0x0208 LD r0, 0x0A
+  // memory[PROG_START_ADDR+ 6] = 0x60;
+  // memory[PROG_START_ADDR+ 7] = 0x0A; // 0x0208 LD r0, 0x0A
   
-  memory[PROG_START_ADDR+ 8] = 0x61;
-  memory[PROG_START_ADDR+ 9] = 0x0A; // 0x020A LD r1, 0x0A
+  // memory[PROG_START_ADDR+ 8] = 0x61;
+  // memory[PROG_START_ADDR+ 9] = 0x0A; // 0x020A LD r1, 0x0A
 
-  memory[PROG_START_ADDR+10] = 0xD0;
-  memory[PROG_START_ADDR+11] = 0x15; // 0x020C DRW r0, r1, 5
+  // memory[PROG_START_ADDR+10] = 0xD0;
+  // memory[PROG_START_ADDR+11] = 0x15; // 0x020C DRW r0, r1, 5
 
-  memory[PROG_START_ADDR+12] = 0x12;
-  memory[PROG_START_ADDR+13] = 0x0C; // 0x020E JP 0x020C
+  // memory[PROG_START_ADDR+12] = 0x12;
+  // memory[PROG_START_ADDR+13] = 0x0C; // 0x020E JP 0x020C
 
   pc = PROG_START_ADDR;
 }
@@ -109,6 +109,15 @@ void CPU::ReadROM(const char *filename)
   }
 
   infile.close();
+}
+
+void CPU::LoadProgram(std::vector<uint8_t> byteCode)
+{
+  uint8_t idx = 0;
+  for (auto byte : byteCode) {
+    memory[PROG_START_ADDR + idx] = byte;
+    idx++;
+  }
 }
 
 void CPU::Fetch()

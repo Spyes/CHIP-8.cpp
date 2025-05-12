@@ -12,11 +12,11 @@ int main(void)
 {
 	std::unique_ptr<Compiler> compiler = std::make_unique<Compiler>();
 	compiler->Compile("./roms/test.asm");
-	compiler->Generator();
 
 	std::unique_ptr<CPU> chip8 = std::make_unique<CPU>();
 	chip8->Initialize();
-	chip8->ReadROM("./roms/1-ibm-logo.ch8");
+	chip8->LoadProgram(compiler->Generator());
+	// chip8->ReadROM("./roms/1-ibm-logo.ch8");
 
 	InitWindow(SCREEN_WIDTH * SCREEN_SCALE, SCREEN_HEIGHT * SCREEN_SCALE, "CHIP-8");
 	SetTargetFPS(60);
