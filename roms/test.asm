@@ -1,7 +1,18 @@
-CLS # 0x00 0x0E
-LD $0, 3 # 0x60 0x03
-LF $0 # 0xF1 0x29
-LD $0, 1A # 0x60 0x0A
-LD $1, 1A # 0x61 0x0A
-DRW $0, $1, 5 # 0xD0 0x15
-JP 20C # 0x12 0x0C
+CLS               ; 0x0200 Clear screen
+LD $3, 4
+LD I, $3
+CALL Draw
+JP GetInput
+
+GetInput:
+  LD $2, K        ; 0x0202 Wait for keyboard input, set input value to v2
+  LD I, $2        ; 0x0204 Set index to value at v2
+
+Draw:
+  LD $0, 0A       ; 0x0206 v0 = 10 
+  LD $1, 0A       ; 0x0208 v1 = 10
+  CLS             ; 0x020A Clear screen
+  DRW $0, $1, 5   ; 0x020C Draw I to (v0, v1), 5 pixels high
+  RTS
+
+JP GetInput       ; 0x020E Jump to GetInput

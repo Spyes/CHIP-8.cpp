@@ -44,7 +44,7 @@ class CPU
     std::array<uint8_t, 2048> display;
 
     // Keypad state - 0x0 to 0xF
-    std::array<uint8_t, 16> keypad;
+    std::array<bool, 16> keypad;
 
     // Current opcode
     uint16_t opcode;
@@ -65,8 +65,8 @@ class CPU
     void LoadProgram(std::vector<uint8_t> program);
     void Fetch();
     void Decode();
-    void SetDelayTimer(uint8_t value);
-    void SetSoundTimer(uint8_t value);
+    void SetKey(uint8_t key);
+    void UnsetKey(uint8_t key);
     void DecrementTimers();
     std::array<uint8_t, 2048> GetDisplay();
 };

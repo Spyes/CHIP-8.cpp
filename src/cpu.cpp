@@ -60,7 +60,7 @@ void CPU::Initialize()
   V.fill(0);
   stack.fill(0);
   display.fill(0);
-  keypad.fill(0);
+  keypad.fill(false);
   memory.fill(0);
   I = 0;
   sp = 0;
@@ -70,27 +70,6 @@ void CPU::Initialize()
   for (uint8_t i = 0; i < FONTSET_SIZE; i++) {
     memory[i + FONT_START_ADDR] = fontset.at(i);
   }
-
-  // memory[PROG_START_ADDR+ 0] = 0x00;
-  // memory[PROG_START_ADDR+ 1] = 0x0E; // 0x0200 CLS
-  
-  // memory[PROG_START_ADDR+ 2] = 0x60;
-  // memory[PROG_START_ADDR+ 3] = 0x01; // 0x0202 LD r0, 0x01
-  
-  // memory[PROG_START_ADDR+ 4] = 0xF0;
-  // memory[PROG_START_ADDR+ 5] = 0x29; // 0x0204 LD F, r0
-  
-  // memory[PROG_START_ADDR+ 6] = 0x60;
-  // memory[PROG_START_ADDR+ 7] = 0x0A; // 0x0208 LD r0, 0x0A
-  
-  // memory[PROG_START_ADDR+ 8] = 0x61;
-  // memory[PROG_START_ADDR+ 9] = 0x0A; // 0x020A LD r1, 0x0A
-
-  // memory[PROG_START_ADDR+10] = 0xD0;
-  // memory[PROG_START_ADDR+11] = 0x15; // 0x020C DRW r0, r1, 5
-
-  // memory[PROG_START_ADDR+12] = 0x12;
-  // memory[PROG_START_ADDR+13] = 0x0C; // 0x020E JP 0x020C
 
   pc = PROG_START_ADDR;
 }
@@ -164,10 +143,13 @@ void CPU::Decode()
           V[GetX()] = V[GetY()];
           break;
         case 0x0001:  // OR
-          printf("0x8XY1 - Unimplemented\n");
+          V[GetX()] |= V[GetY()];
           break;
         case 0x0002:  // AND
-          printf("0x8XY2 - Unimplemented\n");
+          V[GetX()] &= V[GetY()];
+          break;
+        case 0x003:   // XOR
+          V[GetX()] ^= V[GetY()];
           break;
       }
       break;
@@ -197,6 +179,37 @@ void CPU::Decode()
     }
     case 0xF000:
       switch (opcode & 0x00FF) {
+        case 0x0007: {  // FX07 - LD Vx, DT
+          V[GetX()] = delayTimer;
+          break;
+        }
+        case 0x0015: {  // FX15 - LD DT, Vx
+          delayTimer = V[GetX()];
+          break;
+        }
+        case 0x0018: {  // FX18 - LD ST, Vx
+          soundTimer = V[GetX()];
+          break;
+        }
+        case 0x000A: {  // LD Vx, K
+          bool isWaiting = true;
+          for (uint8_t i = 0; i < keypad.size(); i++) {
+            if (keypad.at(i)) {
+              V[GetX()] = i;
+              isWaiting = false;
+              break;
+            }
+          }
+          if (isWaiting) {
+            pc -= 2;
+          }
+          break;
+        }
+        case 0x001E: {  // ADD I, Vx
+          I += V[GetX()];
+          // TODO: Check for overflow, set V[F] accordingly
+          break;
+        }
         case 0x0029: {  // FX29 - LD F, Vx
           uint8_t digit = V[GetX()];
           I = FONT_START_ADDR + (5 * digit);
@@ -211,13 +224,14 @@ void CPU::Decode()
   }
 }
 
-void CPU::SetDelayTimer(uint8_t value)
+void CPU::SetKey(uint8_t key)
 {
-  delayTimer = value;
+  keypad[key] = true;
 }
 
-void CPU::SetSoundTimer(uint8_t value) {
-  soundTimer = value;
+void CPU::UnsetKey(uint8_t key)
+{
+  keypad[key] = false;
 }
 
 void CPU::DecrementTimers() {
